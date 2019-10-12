@@ -1,9 +1,11 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include <HttpClient.h>
+#include <ArduinoHttpClient.h>
 
 const int TRIGPIN = D3;
 const int ECHOPIN = D4;
+WiFiClient wifi;
+HttpClient client = HttpClient(wifi, "192.168.1.58", 80);
 
 void findKnownWiFiNetworks() {
   ESP8266WiFiMulti wifiMulti;
@@ -32,16 +34,19 @@ void setup(void) {
 }
 
 void makeRequest(String request) {
-    HttpClient client;
-    String address = String("http://192.168.1.58/stoplight/" + request);
-    Serial.println("Making the following request: " + address);
-    client.get(address);
+    String fullGet = String("/stoplight/" + request);
+    Serial.println("Making the following request: " + fullGet);
+    client.get(fullGet);
+    if (client.responseStatusCode() == 200) {
+      String response = client.responseBody();
+      Serial.println(String("Responding with :" + response));
+    } else {
+      Serial.println(String("failed GET (response): " + client.responseStatusCode()));
+    }
 }
 
 void loop(void) {
   Serial.println("working");
-  delay(3000);
-  /*
   long duration, distance;
   digitalWrite(TRIGPIN, LOW);
   delayMicroseconds(2);
@@ -53,16 +58,15 @@ void loop(void) {
   distance = (duration/2) * .0344;
   Serial.println(String("distance calculated: " + distance));
   if (distance <= 10) {
-    //makeRequest("red");
     Serial.println(String("Short distance"));
+    makeRequest("red");
   }
   if (distance >= 10 && distance <= 20) {
-    //makeRequest("yellow");
     Serial.println(String("Medium distance"));
+    makeRequest("yellow");
   }
   if (distance > 20) {
-    //makeRequest("green");
     Serial.println(String("Long distance"));
+    makeRequest("green");
   }
-  */
 }
