@@ -4,6 +4,9 @@
 
 const int TRIGPIN = D3;
 const int ECHOPIN = D4;
+const float SPEED_OF_SOUND = .0344;
+bool FLASH_RED = false;
+
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, "10.37.247.183", 80);
 
@@ -55,18 +58,27 @@ void loop(void) {
   digitalWrite(TRIGPIN, LOW);
   duration = pulseIn(ECHOPIN, HIGH);
   Serial.println(String("duration measured: " + duration));
-  distance = (duration/2) * .0344;
+  distance = (duration/2) * SPEED_OF_SOUND;
   Serial.println(String("distance calculated: " + distance));
   if (distance <= 10) {
-    Serial.println(String("Short distance"));
+    if (FLASH_RED) {
+      FLASH_RED = false;
+      makeRequest("red");
+    } else {
+      FLASH_RED = true;
+      makeRequest("off");
+    }
+  }
+  if (distance > 10 && distance <= 20) {
     makeRequest("red");
   }
-  if (distance >= 10 && distance <= 20) {
-    Serial.println(String("Medium distance"));
+  if (distance > 20 && distance <= 30) {
     makeRequest("yellow");
   }
-  if (distance > 20) {
-    Serial.println(String("Long distance"));
+  if (distance > 30 && distance <=50) {
     makeRequest("green");
+  }
+  if (distance > 50) {
+    makeRequest("off");
   }
 }
