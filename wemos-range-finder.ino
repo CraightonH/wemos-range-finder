@@ -5,7 +5,7 @@
 const int TRIGPIN = D3;
 const int ECHOPIN = D4;
 WiFiClient wifi;
-HttpClient client = HttpClient(wifi, "192.168.1.58", 80);
+HttpClient client = HttpClient(wifi, "10.37.247.183", 80);
 
 void findKnownWiFiNetworks() {
   ESP8266WiFiMulti wifiMulti;
